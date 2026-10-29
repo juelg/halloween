@@ -1,0 +1,6 @@
+.DS_Store
+node_modules/
+*.log
+# handoff notes stay local
+HANDOFF_*.md
+ADDENDUM_*.md

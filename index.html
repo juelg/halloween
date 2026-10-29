@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="robots" content="noindex">
+  <title>Robot Brain</title>
+  <link rel="stylesheet" href="css/brain.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/aes-js/3.1.2/index.min.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <span class="title">AI2 EMBODIED AGENT v0.1</span>
+    <span id="st-mode" class="pill">OFF</span>
+    <span id="st-mask" class="pill">SIM</span>
+    <span id="st-relay" class="pill">RELAY OFF</span>
+  </header>
+
+  <main>
+    <section class="face">
+      <canvas id="sim" aria-label="Mask simulator"></canvas>
+      <div id="hud" class="hud">press START</div>
+    </section>
+
+    <section class="controls">
+      <button id="btn-start" class="big primary">START ROBOT</button>
+      <button id="btn-talk" class="big">TALK MODE</button>
+      <button id="btn-mask" class="big">CONNECT MASK</button>
+      <button id="btn-target" class="big">USE: REAL MASK</button>
+      <button id="btn-react" class="big">REACT NOW</button>
+      <button id="btn-crash" class="big">CRASH GAG</button>
+      <button id="btn-lab" class="big">MASK LAB</button>
+      <button id="btn-cam" class="big">SHOW CAMERA</button>
+    </section>
+
+    <video id="video" playsinline muted class="hidden"></video>
+
+    <section id="lab" class="panel hidden">
+      <h2>Mask lab</h2>
+      <p class="hint">Probe the real mask, then lock values in. Everything here is saved on this phone.</p>
+      <label class="row">Brightness <input id="lab-bright" type="range" min="5" max="160" value="90"><output id="lab-bright-v">90</output></label>
+      <div class="row">
+        <select id="lab-cmd"><option>IMAG</option><option>ANIM</option><option>PLAY</option></select>
+        <button id="lab-prev">−</button>
+        <input id="lab-id" type="number" min="0" max="255" value="1">
+        <button id="lab-next">+</button>
+        <button id="lab-send">SEND</button>
+      </div>
+      <div class="row">
+        Assign current id to
+        <select id="lab-face"></select>
+        <button id="lab-assign">ASSIGN</button>
+      </div>
+      <div class="row">
+        <input id="lab-text" value="HELLO HUMANS" maxlength="40">
+        <button id="lab-scroll">SCROLL TEXT</button>
+      </div>
+      <div class="row">
+        <button id="lab-bitmap">UPLOAD TEST BITMAP</button>
+        <button id="lab-faces">CYCLE ALL FACES</button>
+      </div>
+      <div class="row">
+        Faces on real mask
+        <select id="lab-facemode"><option value="builtin">built-in ids</option><option value="custom">upload our pixels</option></select>
+      </div>
+      <div class="row">
+        <label><input id="lab-pad" type="checkbox"> pad upload packets to 100 B</label>
+      </div>
+      <div class="row">
+        Mask width <input id="lab-width" type="number" min="16" max="96"> <button id="lab-width-save">SAVE &amp; RELOAD</button>
+      </div>
+      <pre id="lab-log" class="log"></pre>
+    </section>
+
+    <section class="panel">
+      <h2>Setup</h2>
+      <label class="row">Anthropic API key
+        <input id="set-key" type="password" autocomplete="off" placeholder="sk-ant-…">
+      </label>
+      <div class="row"><button id="set-key-save">SAVE KEY</button><button id="set-key-forget" class="danger">FORGET KEY</button></div>
+
+      <label class="row">Relay
+        <select id="set-relay">
+          <option value="off">off</option>
+          <option value="local">local (two tabs, testing)</option>
+          <option value="firebase">firebase</option>
+        </select>
+      </label>
+      <label class="row">Relay write token
+        <input id="set-token" type="password" autocomplete="off" placeholder="generate, then paste into Firebase admin/token">
+      </label>
+      <div class="row">
+        <button id="set-token-gen">GENERATE</button>
+        <button id="set-token-show">SHOW / COPY</button>
+        <button id="set-token-save">SAVE</button>
+        <button id="set-token-forget" class="danger">FORGET</button>
+      </div>
+
+      <label class="row toggle"><input id="set-voice" type="checkbox" checked> Voice</label>
+      <label class="row toggle"><input id="set-saver" type="checkbox"> Battery saver</label>
+      <label class="row">Brightness <input id="set-bright" type="range" min="5" max="160" value="90"></label>
+    </section>
+
+    <section class="panel">
+      <h2>Selfies (this phone only)</h2>
+      <div id="selfies" class="selfies"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Log</h2>
+      <pre id="log" class="log"></pre>
+    </section>
+  </main>
+
+  <script type="module" src="js/brain.js"></script>
+</body>
+</html>

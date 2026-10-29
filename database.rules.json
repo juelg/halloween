@@ -1,0 +1,65 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "admin": {
+      ".read": false,
+      ".write": false
+    },
+
+    "proof": {
+      ".read": false,
+      "$n": {
+        ".write": "!data.exists() && root.child('admin/token').isString() && newData.val() === root.child('admin/token').val()",
+        ".validate": "$n.length >= 16 && $n.length <= 40"
+      }
+    },
+
+    "status": {
+      ".read": true,
+      ".write": "newData.child('n').isString() && !root.child('proof').child(newData.child('n').val()).exists() && newData.parent().child('proof').child(newData.child('n').val()).val() === root.child('admin/token').val()",
+      ".validate": "newData.hasChildren(['online', 't', 'n']) && newData.child('t').val() === now"
+    },
+
+    "thoughts": {
+      ".read": true,
+      ".indexOn": ["t"],
+      "$id": {
+        ".write": "!data.exists() && newData.child('n').isString() && !root.child('proof').child(newData.child('n').val()).exists() && newData.parent().parent().child('proof').child(newData.child('n').val()).val() === root.child('admin/token').val()",
+        ".validate": "newData.hasChildren(['text', 'kind', 't', 'n'])",
+        "text": { ".validate": "newData.isString() && newData.val().length <= 280" },
+        "kind": { ".validate": "newData.isString() && newData.val().length <= 20" },
+        "t": { ".validate": "newData.val() === now" },
+        "n": { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "requests": {
+      ".read": true,
+      ".indexOn": ["t"],
+      "$id": {
+        ".write": "(!data.exists() && newData.exists()) || (data.exists() && !newData.exists() && !root.child('proof').child('d' + $id).exists() && newData.parent().parent().child('proof').child('d' + $id).val() === root.child('admin/token').val())",
+        ".validate": "newData.hasChildren(['g', 'kind', 'text', 't'])",
+        "g": { ".validate": "newData.isString() && newData.val().length >= 12 && newData.val().length <= 40" },
+        "kind": { ".validate": "newData.val() === 'answer' || newData.val() === 'emote'" },
+        "text": { ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 200" },
+        "riddle": { ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() < 100" },
+        "ticket": { ".validate": "newData.isString() && newData.val().length <= 40" },
+        "t": { ".validate": "newData.val() === now" },
+        "$other": { ".validate": false }
+      }
+    },
+
+    "replies": {
+      "$gid": {
+        ".read": true,
+        "$rid": {
+          ".write": "!data.exists() && newData.child('n').isString() && !root.child('proof').child(newData.child('n').val()).exists() && newData.parent().parent().parent().child('proof').child(newData.child('n').val()).val() === root.child('admin/token').val()",
+          ".validate": "newData.hasChildren(['status', 't', 'n']) && newData.child('t').val() === now"
+        }
+      }
+    }
+  }
+}
