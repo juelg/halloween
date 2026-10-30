@@ -2,9 +2,9 @@
 // access is controlled by database.rules.json. Paste yours from
 // Firebase console → Project settings → Your apps → Web app → Config.
 export const firebaseConfig = {
-  apiKey: 'YOUR_API_KEY',
-  authDomain: 'YOUR_PROJECT.firebaseapp.com',
-  databaseURL: 'https://YOUR_PROJECT-default-rtdb.firebaseio.com',
-  projectId: 'YOUR_PROJECT',
-  appId: 'YOUR_APP_ID',
+  apiKey: 'AIzaSyBHHNFPn-A97vdo7KTjKWWzsiHgomEFUac',
+  authDomain: 'halloween-a414a.firebaseapp.com',
+  databaseURL: 'https://halloween-a414a-default-rtdb.firebaseio.com',
+  projectId: 'halloween-a414a',
+  appId: '1:555857029702:web:4d72fc5b9eb7d188b67847',
 };
