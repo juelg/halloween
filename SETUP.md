@@ -61,10 +61,10 @@ To rotate the token: generate a new one on the phone, save it, and replace `admi
 2. Tell Claude. It adds the remote and pushes `main`.
 3. In the repo, open **Settings → Pages → Build and deployment**. Set *Source* to **Deploy from a branch**, *Branch* to **main** and folder **/ (root)**, then Save.
 4. After about a minute, open:
-   - brain: <https://juelg.github.io/halloween/> (bookmark it on the phone)
-   - guests: <https://juelg.github.io/halloween/mind.html>, which is what the QR code points to.
+   - brain: <https://tobiasjuelg.de/halloween/> (bookmark it on the phone)
+   - guests: <https://tobiasjuelg.de/halloween/mind.html>, which is what the QR code points to.
 
-   If your user site has a custom domain, project pages redirect to it. The QR code points at the github.io URL, which still redirects correctly.
+   `juelg.github.io/halloween/` redirects there, because the user site has the custom domain `tobiasjuelg.de`.
 5. Print `qr.html`. It's 4 tags per page with a PRINT button, or use `qr.png`.
 
 ## Friday: mask lab (once the mask arrives)
