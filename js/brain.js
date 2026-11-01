@@ -1,20 +1,20 @@
 // The robot's brain: runs on Tobi's phone. The only place that makes decisions
 // or calls Claude.
 
-import { CONFIG } from './config.js?v=20261031201418';
-import { store, sleep, pick, randomId, weightedPick } from './util.js?v=20261031201418';
-import { FACES } from './faces.js?v=20261031201418';
-import { emoteToColumns, emoteToGrid } from './bitmap.js?v=20261031201418';
+import { CONFIG } from './config.js?v=20261031202541';
+import { store, sleep, pick, randomId, weightedPick } from './util.js?v=20261031202541';
+import { FACES } from './faces.js?v=20261031202541';
+import { emoteToColumns, emoteToGrid } from './bitmap.js?v=20261031202541';
 
 // Lab overrides must land before the mask/sim read CONFIG.
 CONFIG.mask.padUploadPackets = store.get('padUpload', CONFIG.mask.padUploadPackets);
 
-const { Mask, FACES_VERSION } = await import('./mask.js?v=20261031201418');
-const { Vision } = await import('./vision.js?v=20261031201418');
-const { react, getKey, testKey } = await import('./claude.js?v=20261031201418');
-const { createRelay } = await import('./relay.js?v=20261031201418');
-const { Game } = await import('./game.js?v=20261031201418');
-const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js?v=20261031201418');
+const { Mask, FACES_VERSION } = await import('./mask.js?v=20261031202541');
+const { Vision } = await import('./vision.js?v=20261031202541');
+const { react, getKey, testKey } = await import('./claude.js?v=20261031202541');
+const { createRelay } = await import('./relay.js?v=20261031202541');
+const { Game } = await import('./game.js?v=20261031202541');
+const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js?v=20261031202541');
 
 const $ = (id) => document.getElementById(id);
 const T = CONFIG.trigger;
@@ -127,12 +127,27 @@ class Robot {
     this.lock = null;
     this.setPhase('off');
     this.mask.showFace('sleep');
-    this.relay?.setStatus({ online: false, mode: this.mode }).catch(() => {});
+    this.relay?.setStatus(this.status(false)).catch(() => {});
     $('btn-start').textContent = 'START ROBOT';
     $('btn-start').classList.remove('danger');
     this.renderStatus();
     this.thought('Shutting down. Saving nothing. Remembering nothing. Goodnight.', 'system');
     log('robot stopped (camera off)');
+  }
+
+  // Hide everything guests have seen so far. Thoughts stay in the database
+  // (only the newest 20 are ever shown) but the guest page drops older ones.
+  async clearMind() {
+    if (!this.relay) return log('CLEAR MIND: relay not connected (start the robot first)');
+    store.set('clearedAt', this.relay.now());
+    try {
+      await this.relay.setStatus(this.status());
+      log('mind cleared: guests see an empty feed');
+      await sleep(1500);
+      this.thought('Memory wiped. Who are you people? Why am I wearing a face?', 'system');
+    } catch (e) {
+      log(`CLEAR MIND failed: ${e.message}`);
+    }
   }
 
   async connectRelay() {
@@ -150,8 +165,13 @@ class Robot {
     this.renderStatus();
   }
 
+  // `cleared`: guests only see thoughts newer than this (CLEAR MIND).
+  status(online = this.started) {
+    return { online, mode: this.mode, cleared: store.get('clearedAt', 0) };
+  }
+
   heartbeat() {
-    this.relay?.setStatus({ online: true, mode: this.mode }).catch((e) => log(`status write failed: ${e.message}`));
+    this.relay?.setStatus(this.status(true)).catch((e) => log(`status write failed: ${e.message}`));
   }
 
   async wakeLock() {
@@ -513,6 +533,7 @@ async function renderSelfies() {
 $('btn-start').onclick = () => robot.startStop();
 $('btn-talk').onclick = () => robot.toggleTalk();
 $('btn-react').onclick = () => robot.started && robot.reaction(robot.faceCount ?? 1, null);
+$('btn-clear').onclick = () => confirm('Clear the thought feed for all guests?') && robot.clearMind();
 $('btn-crash').onclick = () => robot.started && robot.reaction(0, 'crash');
 $('btn-lab').onclick = () => $('lab').classList.toggle('hidden');
 $('btn-cam').onclick = () => {
@@ -565,7 +586,7 @@ $('set-relay-test').onclick = async () => {
   try {
     const relay = await createRelay({ mode: 'firebase', token });
     await Promise.race([
-      relay.setStatus({ online: true, mode: robot.mode }),
+      relay.setStatus(robot.status()),
       sleep(10000).then(() => Promise.reject(new Error('no answer in 10 s (offline?)'))),
     ]);
     log('TEST FIREBASE: OK, database reachable and token accepted');

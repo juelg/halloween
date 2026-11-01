@@ -1,11 +1,11 @@
 // Public "read my mind" page. No API key, no power: it displays the thought
 // feed and submits requests that the phone may or may not act on.
 
-import { CONFIG } from './config.js?v=20261031201418';
-import { createRelay } from './relay.js?v=20261031201418';
-import { RIDDLES } from './riddles.js?v=20261031201418';
-import { emoteToGrid, drawGridToCanvas, normalizeEmoteRows } from './bitmap.js?v=20261031201418';
-import { store, randomId } from './util.js?v=20261031201418';
+import { CONFIG } from './config.js?v=20261031202541';
+import { createRelay } from './relay.js?v=20261031202541';
+import { RIDDLES } from './riddles.js?v=20261031202541';
+import { emoteToGrid, drawGridToCanvas, normalizeEmoteRows } from './bitmap.js?v=20261031202541';
+import { store, randomId } from './util.js?v=20261031202541';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -41,7 +41,13 @@ function fmtTime(t) {
   return new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function renderFeed(list) {
+let feedList = [];
+let clearedAt = null; // unknown until the first status arrives (avoids flashing cleared thoughts)
+
+function renderFeed(list = feedList) {
+  feedList = list;
+  if (clearedAt === null) return;
+  list = list.filter((th) => typeof th.t === 'number' && th.t > clearedAt);
   const ol = $('feed');
   ol.innerHTML = '';
   if (!list.length) {
@@ -61,6 +67,11 @@ function renderFeed(list) {
 }
 
 function renderStatus(s) {
+  const c = typeof s?.cleared === 'number' ? s.cleared : 0;
+  if (c !== clearedAt) {
+    clearedAt = c;
+    renderFeed();
+  }
   const online = s && s.online && typeof s.t === 'number' && Date.now() - s.t < 3 * CONFIG.relay.heartbeatMs;
   $('status').textContent = online ? (s.mode === 'talk' ? '● TALK MODE' : '● ONLINE') : '○ OFFLINE';
   $('status').className = 'status ' + (online ? (s.mode === 'talk' ? 'warn' : 'ok') : 'off');

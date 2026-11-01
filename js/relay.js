@@ -11,7 +11,7 @@
 // Backends: 'firebase' (real) and 'local' (BroadcastChannel; two tabs, same
 // browser) for testing without Firebase.
 
-import { randomId } from './util.js?v=20261031201418';
+import { randomId } from './util.js?v=20261031202541';
 
 const FB = 'https://www.gstatic.com/firebasejs/12.19.0/';
 
@@ -25,6 +25,9 @@ class NullRelay {
   name = 'off';
   async postThought() {}
   async setStatus() {}
+  now() {
+    return Date.now();
+  }
   onRequest() {}
   async reply() {}
   async ackRequest() {}
@@ -43,13 +46,15 @@ class FirebaseRelay {
   }
 
   async init() {
-    const { firebaseConfig } = await import('../firebase-config.js?v=20261031201418');
+    const { firebaseConfig } = await import('../firebase-config.js?v=20261031202541');
     if (!firebaseConfig?.databaseURL || firebaseConfig.databaseURL.includes('YOUR_')) {
       throw new Error('firebase-config.js not filled in yet');
     }
     const app = await import(FB + 'firebase-app.js');
     this.fb = await import(FB + 'firebase-database.js');
     this.db = this.fb.getDatabase(app.initializeApp(firebaseConfig));
+    this.offset = 0;
+    this.fb.onValue(this.fb.ref(this.db, '.info/serverTimeOffset'), (s) => (this.offset = s.val() || 0));
     return this;
   }
 
@@ -71,6 +76,11 @@ class FirebaseRelay {
 
   async setStatus(status) {
     await this.phoneWrite('status', status);
+  }
+
+  // Server clock, so "cleared at" compares correctly with thought timestamps.
+  now() {
+    return Date.now() + this.offset;
   }
 
   onRequest(cb) {
@@ -145,6 +155,9 @@ class LocalRelay {
     const list = [{ id: randomId(8), text, kind, t: Date.now() }, ...this.thoughts()].slice(0, 50);
     localStorage.setItem('relay.thoughts', JSON.stringify(list));
     this.send('thoughts', list);
+  }
+  now() {
+    return Date.now();
   }
   async setStatus(status) {
     const s = { ...status, t: Date.now() };
