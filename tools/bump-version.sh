@@ -8,5 +8,5 @@ V=$(date +%Y%m%d%H%M%S)
 # relative module imports: './x.js', "../x.js", optionally already versioned
 perl -pi -e "s#((?:'|\")\.{1,2}/[\w./-]+\.js)(\?v=\w+)?(?=['\"])#\$1?v=$V#g" js/*.js
 # script/link tags in the pages
-perl -pi -e "s#((?:src|href)=\"(?:js|css|vendor)/[\w./-]+\.(?:js|css))(\?v=\w+)?\"#\$1?v=$V\"#g" index.html mind.html qr.html
+perl -pi -e "s#((?:src|href)=\"(?:js|css|vendor)/[\w./-]+\.(?:js|css))(\?v=\w+)?\"#\$1?v=$V\"#g" *.html
 echo "version $V"

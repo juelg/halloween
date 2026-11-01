@@ -9,8 +9,8 @@ cd ~/code/halloween
 python3 -m http.server 8000
 ```
 
-- Brain: <http://localhost:8000/>. Press **START ROBOT**, allow the camera, and watch the simulator.
-- Guest page: <http://localhost:8000/mind.html?relay=local>, in a second tab of the **same** browser.
+- Control page: <http://localhost:8000/robot-ka6pwi7dqd.html>. Press **START ROBOT**, allow the camera, and watch the simulator.
+- Guest page: <http://localhost:8000/?relay=local>, in a second tab of the **same** browser.
 - In the brain's Setup panel, set **Relay → local** and reload. Thoughts now show up in the guest tab, and riddle answers go to the brain.
 - Paste your Anthropic key into **Setup → Anthropic API key → SAVE KEY**. Without a key, reactions use canned lines and the guest game won't render emotes, which is the fail-safe behaviour.
 - Useful buttons: **REACT NOW** forces a reaction, **CRASH GAG** runs the crash, and **TALK MODE** does what covering the lens does.
@@ -22,7 +22,7 @@ Camera and Bluetooth need HTTPS or `localhost`. Use Chrome's port forwarding:
 1. Phone: Settings → About phone → tap *Build number* 7× → Developer options → enable **USB debugging**.
 2. Plug the phone into the laptop. On the laptop, open `chrome://inspect/#devices` and allow the prompt on the phone.
 3. Click **Port forwarding…**, add `8000` → `localhost:8000`, tick *Enable port forwarding* and click Done.
-4. On the phone, open `http://localhost:8000/` in Chrome. It counts as a secure origin.
+4. On the phone, open `http://localhost:8000/robot-ka6pwi7dqd.html` in Chrome. It counts as a secure origin.
 
 ## 2. Firebase relay (about 10 minutes)
 
@@ -61,11 +61,11 @@ To rotate the token: generate a new one on the phone, save it, and replace `admi
 2. Tell Claude. It adds the remote and pushes `main`.
 3. In the repo, open **Settings → Pages → Build and deployment**. Set *Source* to **Deploy from a branch**, *Branch* to **main** and folder **/ (root)**, then Save.
 4. After about a minute, open:
-   - brain: <https://tobiasjuelg.de/halloween/> (bookmark it on the phone)
-   - guests: <https://tobiasjuelg.de/halloween/mind.html>, which is what the QR code points to.
+   - control page: <https://tobiasjuelg.de/halloween/robot-ka6pwi7dqd.html> (bookmark it on the phone)
+   - guests: <https://tobiasjuelg.de/halloween/>, which is what the QR code points to.
 
    `juelg.github.io/halloween/` redirects there, because the user site has the custom domain `tobiasjuelg.de`.
-5. Print `qr.html`. It's 4 tags per page with a PRINT button, or use `qr.png`.
+5. Print `qr-tags.pdf` (one big US-letter poster), or open `qr.html` and use its PRINT button, or use `qr.png`.
 
 ## Friday: mask lab (once the mask arrives)
 

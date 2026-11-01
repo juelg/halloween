@@ -4,129 +4,61 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
-  <meta name="robots" content="noindex">
-  <title>Robot Brain</title>
-  <link rel="stylesheet" href="css/brain.css?v=20261031195155">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/aes-js/3.1.2/index.min.js"></script>
+  <title>Read My Mind</title>
+  <meta name="description" content="Live thoughts of Ai2 Embodied Agent v0.1, a party robot that escaped an AI lab.">
+  <link rel="stylesheet" href="css/mind.css?v=20261031200737">
 </head>
 <body>
-  <header class="bar">
-    <span class="title">AI2 EMBODIED AGENT v0.1</span>
-    <span id="st-mode" class="pill">OFF</span>
-    <span id="st-mask" class="pill">SIM</span>
-    <span id="st-relay" class="pill">RELAY OFF</span>
-  </header>
-
+  <div class="scanlines" aria-hidden="true"></div>
   <main>
-    <section class="face">
-      <canvas id="sim" aria-label="Mask simulator"></canvas>
-      <div id="hud" class="hud">press START</div>
+    <header>
+      <p class="boot">&gt; ssh guest@ai2-embodied-agent</p>
+      <h1>AI2 EMBODIED AGENT <span class="ver">v0.1</span></h1>
+      <p class="sub">READ MY MIND <span id="status" class="status">CONNECTING…</span></p>
+      <p class="about">
+        I am a friendly robot that escaped an AI lab. My eye is a camera on my human's chest, and my face is the LED mask.
+        I react to <b>costumes only</b>. I identify no one, and I save no photos.
+        The only exception is a group selfie, and only if you give me a 👍. It stays on my human's phone and is never uploaded.
+      </p>
+    </header>
+
+    <section aria-labelledby="feed-h">
+      <h2 id="feed-h">// live thoughts</h2>
+      <ol id="feed" class="feed"><li class="muted">waiting for thoughts…</li></ol>
     </section>
 
-    <section class="controls">
-      <button id="btn-start" class="big primary">START ROBOT</button>
-      <button id="btn-talk" class="big">TALK MODE</button>
-      <button id="btn-mask" class="big">CONNECT MASK</button>
-      <button id="btn-target" class="big">USE: REAL MASK</button>
-      <button id="btn-react" class="big">REACT NOW</button>
-      <button id="btn-crash" class="big">CRASH GAG</button>
-      <button id="btn-lab" class="big">MASK LAB</button>
-      <button id="btn-cam" class="big">SHOW CAMERA</button>
+    <section aria-labelledby="egg-h" class="egg">
+      <h2 id="egg-h">// guest_control.exe</h2>
+
+      <div id="stage-riddle">
+        <p class="prompt">Solve my riddle to borrow my face for ten seconds:</p>
+        <p id="riddle" class="riddle">…</p>
+        <form id="answer-form" autocomplete="off">
+          <input id="answer" maxlength="200" placeholder="your answer" aria-label="Your answer">
+          <button id="answer-btn">SUBMIT</button>
+        </form>
+        <p class="tiny">…or convince me. <button id="new-riddle" class="link">another riddle</button></p>
+      </div>
+
+      <div id="stage-emote" class="hidden">
+        <p class="prompt">ACCESS GRANTED. Describe an emote for my face (e.g. "a cat sneezing"):</p>
+        <form id="emote-form" autocomplete="off">
+          <input id="emote" maxlength="120" placeholder="a ghost doing a kickflip" aria-label="Emote idea">
+          <button id="emote-btn">RENDER</button>
+        </form>
+        <p class="tiny">It gets a safety check first. Keep it friendly. My human can veto anything.</p>
+      </div>
+
+      <div id="preview-wrap" class="hidden">
+        <canvas id="preview" aria-label="Emote preview"></canvas>
+        <p id="preview-cap" class="cap"></p>
+      </div>
+
+      <p id="msg" class="msg" role="status" aria-live="polite"></p>
     </section>
 
-    <video id="video" playsinline muted class="hidden"></video>
-
-    <section id="lab" class="panel hidden">
-      <h2>Mask lab</h2>
-      <p class="hint">Probe the real mask, then lock values in. Everything here is saved on this phone.</p>
-      <div class="row">
-        <button id="lab-install">INSTALL FACES</button>
-        <span id="lab-install-status" class="hint"></span>
-      </div>
-      <label class="row">Brightness <input id="lab-bright" type="range" min="5" max="160" value="90"><output id="lab-bright-v">90</output></label>
-      <div class="row">
-        <select id="lab-cmd"><option>IMAG</option><option>ANIM</option><option>PLAY</option></select>
-        <button id="lab-prev">−</button>
-        <input id="lab-id" type="number" min="0" max="255" value="1">
-        <button id="lab-next">+</button>
-        <button id="lab-send">SEND</button>
-      </div>
-      <div class="row">
-        Assign current id to
-        <select id="lab-face"></select>
-        <button id="lab-assign">ASSIGN</button>
-      </div>
-      <div class="row">
-        <input id="lab-text" value="HELLO HUMANS" maxlength="40">
-        <button id="lab-scroll">SCROLL TEXT</button>
-      </div>
-      <div class="row">
-        <button id="lab-ruler">RULER</button>
-        <button id="lab-bgblack">BG BLACK</button>
-        <span class="hint">64 columns, colour changes every 10, white tick every 5, top + bottom rows lit</span>
-      </div>
-      <div class="row">
-        DIY image <input id="lab-iw" type="number" min="8" max="96" value="46"> × <input id="lab-ih" type="number" min="8" max="96" value="58">
-        slot <input id="lab-islot" type="number" min="0" max="20" value="1">
-        <select id="lab-iorder"><option value="col">column order</option><option value="row">row order</option></select>
-        <button id="lab-image">UPLOAD TEST IMAGE</button>
-      </div>
-      <div class="row">
-        <button id="lab-bitmap">UPLOAD TEST BITMAP</button>
-        <button id="lab-faces">CYCLE ALL FACES</button>
-      </div>
-      <div class="row">
-        Faces on real mask
-        <select id="lab-facemode"><option value="diy">our faces (installed)</option><option value="builtin">built-in ids</option></select>
-      </div>
-      <div class="row">
-        <label><input id="lab-pad" type="checkbox"> pad upload packets to 100 B</label>
-      </div>
-      <div class="row"><button id="lab-copy">COPY LOG</button></div>
-      <pre id="lab-log" class="log"></pre>
-    </section>
-
-    <section class="panel">
-      <h2>Setup</h2>
-      <label class="row">Anthropic API key
-        <input id="set-key" type="password" autocomplete="off" placeholder="sk-ant-…">
-      </label>
-      <div class="row"><button id="set-key-save">SAVE KEY</button><button id="set-key-forget" class="danger">FORGET KEY</button><button id="set-key-test">TEST CLAUDE</button></div>
-
-      <label class="row">Relay
-        <select id="set-relay">
-          <option value="off">off</option>
-          <option value="local">local (two tabs, testing)</option>
-          <option value="firebase">firebase</option>
-        </select>
-      </label>
-      <label class="row">Relay write token
-        <input id="set-token" type="password" autocomplete="off" placeholder="generate, then paste into Firebase admin/token">
-      </label>
-      <div class="row">
-        <button id="set-token-gen">GENERATE</button>
-        <button id="set-token-show">SHOW / COPY</button>
-        <button id="set-token-save">SAVE</button>
-        <button id="set-token-forget" class="danger">FORGET</button>
-        <button id="set-relay-test">TEST FIREBASE</button>
-      </div>
-
-      <label class="row toggle"><input id="set-voice" type="checkbox" checked> Voice</label>
-      <label class="row toggle"><input id="set-saver" type="checkbox"> Battery saver</label>
-      <label class="row">Brightness <input id="set-bright" type="range" min="5" max="160" value="90"></label>
-    </section>
-
-    <section class="panel">
-      <h2>Selfies (this phone only)</h2>
-      <div id="selfies" class="selfies"></div>
-    </section>
-
-    <section class="panel">
-      <h2>Log</h2>
-      <pre id="log" class="log"></pre>
-    </section>
+    <footer>made for one party · no tracking · <a href="https://github.com/juelg/halloween">source</a></footer>
   </main>
-
-  <script type="module" src="js/brain.js?v=20261031195155"></script>
+  <script type="module" src="js/mind.js?v=20261031200737"></script>
 </body>
 </html>

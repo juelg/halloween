@@ -1,20 +1,20 @@
 // The robot's brain: runs on Tobi's phone. The only place that makes decisions
 // or calls Claude.
 
-import { CONFIG } from './config.js?v=20261031195155';
-import { store, sleep, pick, randomId, weightedPick } from './util.js?v=20261031195155';
-import { FACES } from './faces.js?v=20261031195155';
-import { emoteToColumns, emoteToGrid } from './bitmap.js?v=20261031195155';
+import { CONFIG } from './config.js?v=20261031200737';
+import { store, sleep, pick, randomId, weightedPick } from './util.js?v=20261031200737';
+import { FACES } from './faces.js?v=20261031200737';
+import { emoteToColumns, emoteToGrid } from './bitmap.js?v=20261031200737';
 
 // Lab overrides must land before the mask/sim read CONFIG.
 CONFIG.mask.padUploadPackets = store.get('padUpload', CONFIG.mask.padUploadPackets);
 
-const { Mask, FACES_VERSION } = await import('./mask.js?v=20261031195155');
-const { Vision } = await import('./vision.js?v=20261031195155');
-const { react, getKey, testKey } = await import('./claude.js?v=20261031195155');
-const { createRelay } = await import('./relay.js?v=20261031195155');
-const { Game } = await import('./game.js?v=20261031195155');
-const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js?v=20261031195155');
+const { Mask, FACES_VERSION } = await import('./mask.js?v=20261031200737');
+const { Vision } = await import('./vision.js?v=20261031200737');
+const { react, getKey, testKey } = await import('./claude.js?v=20261031200737');
+const { createRelay } = await import('./relay.js?v=20261031200737');
+const { Game } = await import('./game.js?v=20261031200737');
+const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js?v=20261031200737');
 
 const $ = (id) => document.getElementById(id);
 const T = CONFIG.trigger;

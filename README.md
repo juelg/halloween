@@ -6,9 +6,10 @@ Plain HTML/JS/CSS, ES modules, pinned CDN versions, no build step. See **[SETUP.
 
 | file | what |
 |---|---|
-| `index.html` | brain page, on the phone: camera, triggers, Claude calls, voice, mask control |
-| `mind.html` | public guest page: thought feed and the riddle/emote easter egg |
-| `qr.html`, `qr.png` | printable "SCAN TO READ MY MIND" tags |
+| `index.html` | public guest page: thought feed and the riddle/emote easter egg (what the QR code opens) |
+| `robot-*.html` | control page, on the phone: camera, triggers, Claude calls, voice, mask control. Unlisted name so guests don't stumble on it; it holds no secrets (the key and token live only in the phone's browser) |
+| `mind.html` | old guest URL, redirects to `index.html` |
+| `qr.html`, `qr.png`, `qr-tags.pdf` | printable "SCAN TO READ MY MIND" poster |
 | `js/config.js` | every tunable number (trigger distance, cooldowns, rate limits, models) |
 | `js/brain.js` | the robot's behaviours (idle, sleep, reactions, crash gag, selfie, talk mode, guest control) |
 | `js/vision.js` | camera, MediaPipe face detection, thumbs-up, covered-lens detection |

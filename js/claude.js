@@ -2,10 +2,10 @@
 // fails safe: callers get a canned result on any error and never see a throw
 // from bad JSON.
 
-import { CONFIG } from './config.js?v=20261031195155';
-import { REACTION_FACES } from './faces.js?v=20261031195155';
-import { store, clamp, pick } from './util.js?v=20261031195155';
-import { normalizeEmoteRows, EMOTE_PALETTE } from './bitmap.js?v=20261031195155';
+import { CONFIG } from './config.js?v=20261031200737';
+import { REACTION_FACES } from './faces.js?v=20261031200737';
+import { store, clamp, pick } from './util.js?v=20261031200737';
+import { normalizeEmoteRows, EMOTE_PALETTE } from './bitmap.js?v=20261031200737';
 
 const API = 'https://api.anthropic.com/v1/messages';
 

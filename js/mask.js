@@ -7,12 +7,12 @@
 // switching faces is a single PLAY command. Animated faces loop over a few
 // slots. 'builtin' mode uses the mask's own images by id instead.
 
-import { CONFIG } from './config.js?v=20261031195155';
-import { BUILTIN_DEFAULT, fullFaceFrames, gridToImageBytes } from './faces.js?v=20261031195155';
-import { textToColumns } from './bitmap.js?v=20261031195155';
-import { MaskBLE, TEXT_MODE } from './mask-ble.js?v=20261031195155';
-import { MaskSim } from './sim.js?v=20261031195155';
-import { store } from './util.js?v=20261031195155';
+import { CONFIG } from './config.js?v=20261031200737';
+import { BUILTIN_DEFAULT, fullFaceFrames, gridToImageBytes } from './faces.js?v=20261031200737';
+import { textToColumns } from './bitmap.js?v=20261031200737';
+import { MaskBLE, TEXT_MODE } from './mask-ble.js?v=20261031200737';
+import { MaskSim } from './sim.js?v=20261031200737';
+import { store } from './util.js?v=20261031200737';
 
 // Bump when the face art changes, so the lab knows the installed set is stale.
 export const FACES_VERSION = 1;

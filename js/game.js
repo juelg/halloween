@@ -1,11 +1,11 @@
 // Phone side of the guest easter egg. Everything arriving from the relay is
 // untrusted: shape-checked, rate-limited, and screened before it reaches the mask.
 
-import { CONFIG } from './config.js?v=20261031195155';
-import { RIDDLES, normalizeAnswer } from './riddles.js?v=20261031195155';
-import { judgeAttempt, renderEmote, screenEmote } from './claude.js?v=20261031195155';
-import { emoteToGrid, drawGridToCanvas } from './bitmap.js?v=20261031195155';
-import { sha256, randomId, RateLimit, clamp } from './util.js?v=20261031195155';
+import { CONFIG } from './config.js?v=20261031200737';
+import { RIDDLES, normalizeAnswer } from './riddles.js?v=20261031200737';
+import { judgeAttempt, renderEmote, screenEmote } from './claude.js?v=20261031200737';
+import { emoteToGrid, drawGridToCanvas } from './bitmap.js?v=20261031200737';
+import { sha256, randomId, RateLimit, clamp } from './util.js?v=20261031200737';
 
 const G = CONFIG.game;
 
