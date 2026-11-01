@@ -617,6 +617,61 @@ $('lab-bitmap').onclick = async () => {
   const ok = await robot.mask.playEmoteBitmap(emoteToColumns(rows), 'TEST BITMAP');
   labLog(ok ? 'test bitmap sent' : 'bitmap failed (fell back to text)');
 };
+// Ruler on the 16-row text channel: count what's visible to find the real width
+// and where the band sits.
+$('lab-ruler').onclick = async () => {
+  const b = robot.mask.ble;
+  if (!b.connected) return labLog('mask not connected');
+  const hues = [[255, 0, 0], [255, 120, 0], [255, 230, 0], [0, 255, 0], [0, 220, 255], [0, 60, 255], [200, 0, 255]];
+  const cols = Array.from({ length: 64 }, (_, i) => {
+    const tick = i % 5 === 0;
+    const bits = Array.from({ length: 16 }, (_, y) => y === 0 || y === 15 || tick || (y === 7 && i % 10 < 5));
+    return { bits, rgb: tick && i % 10 ? [255, 255, 255] : hues[Math.floor(i / 10)] };
+  });
+  try {
+    await b.showColumns(cols, 1);
+    labLog('ruler sent: 0-9 red, 10-19 orange, 20-29 yellow, 30-39 green, 40-49 cyan, 50-59 blue, 60-63 purple');
+  } catch (e) {
+    labLog(`ruler failed: ${e.message}`);
+  }
+};
+
+// EXPERIMENTAL full-colour DIY image: red top-left corner, green top-right,
+// blue bottom-left, white border and a yellow diagonal, so size, orientation
+// and pixel order are obvious from one look.
+$('lab-image').onclick = async () => {
+  const b = robot.mask.ble;
+  if (!b.connected) return labLog('mask not connected');
+  const w = +$('lab-iw').value, h = +$('lab-ih').value, slot = +$('lab-islot').value;
+  const rgb = new Uint8Array(w * h * 3);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      let c = [0, 0, 0];
+      if (x === 0 || y === 0 || x === w - 1 || y === h - 1) c = [255, 255, 255];
+      if (Math.abs(x / w - y / h) < 0.03) c = [255, 220, 0];
+      if (x < 6 && y < 6) c = [255, 0, 0];
+      if (x >= w - 6 && y < 6) c = [0, 255, 0];
+      if (x < 6 && y >= h - 6) c = [0, 0, 255];
+      rgb.set(c, (y * w + x) * 3);
+    }
+  }
+  labLog(`uploading ${w}x${h} = ${rgb.length} B to slot ${slot}…`);
+  try {
+    await b.uploadImage(rgb, slot);
+    await b.playDIY(slot);
+    labLog(`image uploaded, PLAY 1 ${slot} sent`);
+  } catch (e) {
+    labLog(`image upload failed: ${e.message}`);
+  }
+};
+$('lab-copy').onclick = async () => {
+  try {
+    await navigator.clipboard.writeText($('lab-log').textContent);
+    labLog('log copied');
+  } catch (e) {
+    labLog(`copy failed: ${e.message}`);
+  }
+};
 $('lab-faces').onclick = async () => {
   for (const name of Object.keys(FACES)) {
     labLog(`face: ${name}`);

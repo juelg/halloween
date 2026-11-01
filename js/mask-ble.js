@@ -178,10 +178,20 @@ export class MaskBLE extends EventTarget {
     const all = new Uint8Array(bitmap.length + colors.length);
     all.set(bitmap);
     all.set(colors, bitmap.length);
+    return this.upload(all, [all.length >> 8, all.length & 0xff, bitmap.length >> 8, bitmap.length & 0xff, 0]);
+  }
+
+  // Full-colour DIY image (EXPERIMENTAL): raw RGB bytes into DIY slot `index`,
+  // then shown with playDIY(index). Pixel layout still to be confirmed on the mask.
+  uploadImage(rgb, index) {
+    return this.upload(rgb, [rgb.length >> 8, rgb.length & 0xff, index >> 8, index & 0xff, 1]);
+  }
+
+  upload(all, datsArgs) {
     return this.run(async () => {
       const t0 = performance.now();
       const ok = this.expect('DATSOK');
-      await this.rawCommand('DATS', [all.length >> 8, all.length & 0xff, bitmap.length >> 8, bitmap.length & 0xff, 0]);
+      await this.rawCommand('DATS', datsArgs);
       await ok;
       const chunk = CONFIG.mask.uploadChunk;
       for (let off = 0, n = 0; off < all.length; off += chunk, n++) {
