@@ -646,6 +646,7 @@ $('lab-image').onclick = async () => {
   const b = robot.mask.ble;
   if (!b.connected) return labLog('mask not connected');
   const w = +$('lab-iw').value, h = +$('lab-ih').value, slot = +$('lab-islot').value;
+  const byCol = $('lab-iorder').value === 'col';
   const rgb = new Uint8Array(w * h * 3);
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -655,14 +656,15 @@ $('lab-image').onclick = async () => {
       if (x < 6 && y < 6) c = [255, 0, 0];
       if (x >= w - 6 && y < 6) c = [0, 255, 0];
       if (x < 6 && y >= h - 6) c = [0, 0, 255];
-      rgb.set(c, (y * w + x) * 3);
+      rgb.set(c, (byCol ? x * h + y : y * w + x) * 3);
     }
   }
-  labLog(`uploading ${w}x${h} = ${rgb.length} B to slot ${slot}…`);
+  labLog(`uploading ${w}x${h} ${byCol ? 'column' : 'row'} order = ${rgb.length} B to slot ${slot}…`);
+  const t0 = performance.now();
   try {
     await b.uploadImage(rgb, slot);
     await b.playDIY(slot);
-    labLog(`image uploaded, PLAY 1 ${slot} sent`);
+    labLog(`image uploaded in ${((performance.now() - t0) / 1000).toFixed(1)} s, PLAY 1 ${slot} sent`);
   } catch (e) {
     labLog(`image upload failed: ${e.message}`);
   }
