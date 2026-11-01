@@ -1,11 +1,11 @@
 // Phone side of the guest easter egg. Everything arriving from the relay is
 // untrusted: shape-checked, rate-limited, and screened before it reaches the mask.
 
-import { CONFIG } from './config.js';
-import { RIDDLES, normalizeAnswer } from './riddles.js';
-import { judgeAttempt, renderEmote, screenEmote } from './claude.js';
-import { emoteToColumns, drawColumnsToCanvas } from './bitmap.js';
-import { sha256, randomId, RateLimit, clamp } from './util.js';
+import { CONFIG } from './config.js?v=20261031193659';
+import { RIDDLES, normalizeAnswer } from './riddles.js?v=20261031193659';
+import { judgeAttempt, renderEmote, screenEmote } from './claude.js?v=20261031193659';
+import { emoteToGrid, drawGridToCanvas } from './bitmap.js?v=20261031193659';
+import { sha256, randomId, RateLimit, clamp } from './util.js?v=20261031193659';
 
 const G = CONFIG.game;
 
@@ -109,8 +109,8 @@ export class Game {
       this.reply(g, { status: 'rendering', msg: 'RENDERING PIXELS WITH MAXIMUM CONFIDENCE…' });
       const art = await renderEmote(idea);
       if (!art) return this.reply(g, { status: 'rejected', msg: 'I COULD NOT DRAW THAT. (OR WOULD NOT.)' });
-      const cols = emoteToColumns(art.rows);
-      const png = drawColumnsToCanvas(document.createElement('canvas'), cols, { scale: 16 })
+      const grid = emoteToGrid(art.rows);
+      const png = drawGridToCanvas(document.createElement('canvas'), grid, { scale: 8 })
         .toDataURL('image/png')
         .split(',')[1];
       const verdict = await screenEmote({ idea, caption: art.caption, pngBase64: png });
@@ -118,7 +118,7 @@ export class Game {
         this.log(`emote rejected: ${verdict.reason}`);
         return this.reply(g, { status: 'rejected', msg: 'SAFETY SCREEN SAYS NO. TRY SOMETHING ELSE SPOOKY-CUTE.' });
       }
-      const item = { id: randomId(8), g, idea, caption: art.caption, rows: art.rows, cols };
+      const item = { id: randomId(8), g, idea, caption: art.caption, rows: art.rows, grid };
       this.queue.push(item);
       this.reply(g, { status: 'queued', msg: `QUEUED (#${this.queue.length}). WATCH MY FACE!`, preview: { rows: art.rows, caption: art.caption } });
       this.pump();

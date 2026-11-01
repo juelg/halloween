@@ -29,7 +29,7 @@ body {
 .pill.warn { color: var(--warn); border-color: var(--warn); }
 main { max-width: 760px; margin: 0 auto; }
 .face { margin: 6px 0 12px; }
-#sim { width: 100%; display: block; border-radius: 14px; background: #020304; border: 1px solid var(--line); }
+#sim { width: min(100%, 260px); display: block; margin: 0 auto; border-radius: 50% / 46%; background: #020304; border: 1px solid var(--line); }
 .hud { font-size: 11px; color: var(--dim); margin-top: 6px; min-height: 2.8em; }
 .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 button {

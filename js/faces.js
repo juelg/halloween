@@ -236,12 +236,13 @@ function stamp(grid, sprite, x0, y0, color, flip = false) {
 }
 
 // Returns grid[h][w] of [r,g,b] | null. `t` (ms) drives the small animations.
-export function renderFace(name, w, h, t = 0) {
+// `layout` overrides where eyes, mouth and the sleep z sit.
+export function renderFace(name, w, h, t = 0, layout = {}) {
   const f = FACES[name] || FACES.neutral;
   const grid = Array.from({ length: h }, () => Array(w).fill(null));
-  const eyeY = Math.round(h * 0.12);
-  const mouthY = Math.round(h * 0.62);
-  const lx = Math.round(w * 0.14), rx = w - lx - 8;
+  const eyeY = layout.eyeY ?? Math.round(h * 0.12);
+  const mouthY = layout.mouthY ?? Math.round(h * 0.62);
+  const lx = layout.lx ?? Math.round(w * 0.14), rx = w - lx - 8;
   const mx = Math.round((w - 16) / 2);
   stamp(grid, EYES[f.eyes[0]], lx, eyeY, f.color);
   stamp(grid, EYES[f.eyes[1]], rx, eyeY, f.color, !!f.mirror);
@@ -256,7 +257,7 @@ export function renderFace(name, w, h, t = 0) {
     }
   } else if (f.anim === 'zzz') {
     const phase = Math.floor(t / 600) % 3;
-    const zx = w - 6 - phase, zy = 1 + (2 - phase);
+    const zx = (layout.zx ?? w - 6) - phase, zy = (layout.zy ?? 1) + (2 - phase);
     stamp(grid, ['###', '.#.', '###'], zx, zy, C.white);
   } else if (f.anim === 'scan') {
     const sx = Math.floor((t / 40) % (w * 2));
@@ -305,4 +306,72 @@ export function columnsToGrid(cols, w = cols.length, h = 16, offset = 0) {
     col.bits.forEach((on, y) => { if (on && y < h) grid[y][x] = col.rgb; });
   });
   return grid;
+}
+
+// ---------------------------------------------------------------- full face
+// The real mask is a 46 x 58 oval (corners have no LEDs). Faces are drawn at
+// half resolution (23 x 29) and doubled, which keeps the chunky robot look and
+// lines the eyes up with the mask's eye area.
+
+export const FULL_W = 46, FULL_H = 58;
+
+// Is (x, y) a real LED? (The corners of the rectangle are outside the oval.)
+export function inOval(x, y, w = FULL_W, h = FULL_H) {
+  const dx = (x + 0.5 - w / 2) / (w / 2), dy = (y + 0.5 - h / 2) / (h / 2);
+  return dx * dx + dy * dy <= 1;
+}
+
+export function scaleGrid(grid, k) {
+  return grid.flatMap((row) => {
+    const wide = row.flatMap((c) => Array(k).fill(c));
+    return Array.from({ length: k }, () => wide.slice());
+  });
+}
+
+const FULL_LAYOUT = { eyeY: 9, mouthY: 20, lx: 3, zx: 15, zy: 3 };
+
+export function renderFullFace(name, t = 0) {
+  return scaleGrid(renderFace(name, 23, 29, t, FULL_LAYOUT), 2);
+}
+
+// Animated faces become a few still frames (DIY slots) played in a loop.
+const FRAME_TIMES = {
+  thinking: [0, 300, 600],
+  sleep: [0, 600, 1200],
+  glitch: [90, 450],
+  scan: [0, 360, 720],
+};
+
+// Ordered by importance, so if the mask has fewer slots than this, the
+// faces that matter most still get installed. 'black' backs scrolling text.
+export const FULL_FACE_ORDER = [
+  'black', 'neutral', 'blink', 'happy', 'surprised', 'thinking', 'laugh', 'dead', 'sleep',
+  'look_left', 'look_right', 'love', 'sad', 'angry', 'wink', 'suspicious', 'confused',
+  'excited', 'glitch', 'scan',
+];
+
+// [{ face, grid }] in install order.
+export function fullFaceFrames() {
+  const frames = [];
+  for (const face of FULL_FACE_ORDER) {
+    if (face === 'black') {
+      frames.push({ face, grid: Array.from({ length: FULL_H }, () => Array(FULL_W).fill(null)) });
+      continue;
+    }
+    for (const t of FRAME_TIMES[face] || [0]) frames.push({ face, grid: renderFullFace(face, t) });
+  }
+  return frames;
+}
+
+// grid[58][46] -> the mask's DIY image bytes: RGB, column by column, top to bottom.
+export function gridToImageBytes(grid) {
+  const h = grid.length, w = grid[0].length;
+  const out = new Uint8Array(w * h * 3);
+  for (let x = 0; x < w; x++) {
+    for (let y = 0; y < h; y++) {
+      const c = grid[y][x];
+      if (c) out.set(c, (x * h + y) * 3);
+    }
+  }
+  return out;
 }

@@ -3,8 +3,8 @@
 // GoneUp/mask-go (MIT) and beclamide/mask-controller (MIT).
 // Needs the global `aesjs` (aes-js 3.1.2, loaded by index.html).
 
-import { CONFIG } from './config.js';
-import { encodeColumns } from './bitmap.js';
+import { CONFIG } from './config.js?v=20261031193659';
+import { encodeColumns } from './bitmap.js?v=20261031193659';
 
 const SERVICE = 0xfff0;
 const CHAR_CMD = 'd44bc439-abfd-45a2-b575-925416129600';

@@ -1,11 +1,11 @@
 // Public "read my mind" page. No API key, no power: it displays the thought
 // feed and submits requests that the phone may or may not act on.
 
-import { CONFIG } from './config.js';
-import { createRelay } from './relay.js';
-import { RIDDLES } from './riddles.js';
-import { emoteToColumns, drawColumnsToCanvas, normalizeEmoteRows } from './bitmap.js';
-import { store, randomId } from './util.js';
+import { CONFIG } from './config.js?v=20261031193659';
+import { createRelay } from './relay.js?v=20261031193659';
+import { RIDDLES } from './riddles.js?v=20261031193659';
+import { emoteToGrid, drawGridToCanvas, normalizeEmoteRows } from './bitmap.js?v=20261031193659';
+import { store, randomId } from './util.js?v=20261031193659';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -67,9 +67,9 @@ function renderStatus(s) {
 }
 
 function showPreview(p) {
-  const rows = normalizeEmoteRows(p?.rows, CONFIG.game.emoteWidth);
+  const rows = normalizeEmoteRows(p?.rows, CONFIG.game.emoteWidth, CONFIG.game.emoteHeight);
   if (!rows) return;
-  drawColumnsToCanvas($('preview'), emoteToColumns(rows), { scale: 14 });
+  drawGridToCanvas($('preview'), emoteToGrid(rows), { scale: 5 });
   $('preview-cap').textContent = String(p.caption || '').slice(0, 24);
   $('preview-wrap').classList.remove('hidden');
 }

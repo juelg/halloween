@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#000000">
   <meta name="robots" content="noindex">
   <title>Robot Brain</title>
-  <link rel="stylesheet" href="css/brain.css">
+  <link rel="stylesheet" href="css/brain.css?v=20261031193659">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aes-js/3.1.2/index.min.js"></script>
 </head>
 <body>
@@ -39,6 +39,10 @@
     <section id="lab" class="panel hidden">
       <h2>Mask lab</h2>
       <p class="hint">Probe the real mask, then lock values in. Everything here is saved on this phone.</p>
+      <div class="row">
+        <button id="lab-install">INSTALL FACES</button>
+        <span id="lab-install-status" class="hint"></span>
+      </div>
       <label class="row">Brightness <input id="lab-bright" type="range" min="5" max="160" value="90"><output id="lab-bright-v">90</output></label>
       <div class="row">
         <select id="lab-cmd"><option>IMAG</option><option>ANIM</option><option>PLAY</option></select>
@@ -73,13 +77,10 @@
       </div>
       <div class="row">
         Faces on real mask
-        <select id="lab-facemode"><option value="builtin">built-in ids</option><option value="custom">upload our pixels</option></select>
+        <select id="lab-facemode"><option value="diy">our faces (installed)</option><option value="builtin">built-in ids</option></select>
       </div>
       <div class="row">
         <label><input id="lab-pad" type="checkbox"> pad upload packets to 100 B</label>
-      </div>
-      <div class="row">
-        Mask width <input id="lab-width" type="number" min="16" max="96"> <button id="lab-width-save">SAVE &amp; RELOAD</button>
       </div>
       <div class="row"><button id="lab-copy">COPY LOG</button></div>
       <pre id="lab-log" class="log"></pre>
@@ -126,6 +127,6 @@
     </section>
   </main>
 
-  <script type="module" src="js/brain.js"></script>
+  <script type="module" src="js/brain.js?v=20261031193659"></script>
 </body>
 </html>

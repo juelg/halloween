@@ -1,21 +1,20 @@
 // The robot's brain: runs on Tobi's phone. The only place that makes decisions
 // or calls Claude.
 
-import { CONFIG } from './config.js';
-import { store, sleep, pick, randomId, weightedPick } from './util.js';
-import { FACES } from './faces.js';
-import { emoteToColumns } from './bitmap.js';
+import { CONFIG } from './config.js?v=20261031193659';
+import { store, sleep, pick, randomId, weightedPick } from './util.js?v=20261031193659';
+import { FACES } from './faces.js?v=20261031193659';
+import { emoteToColumns, emoteToGrid } from './bitmap.js?v=20261031193659';
 
 // Lab overrides must land before the mask/sim read CONFIG.
-CONFIG.mask.width = store.get('maskWidth', CONFIG.mask.width);
 CONFIG.mask.padUploadPackets = store.get('padUpload', CONFIG.mask.padUploadPackets);
 
-const { Mask } = await import('./mask.js');
-const { Vision } = await import('./vision.js');
-const { react, getKey, testKey } = await import('./claude.js');
-const { createRelay } = await import('./relay.js');
-const { Game } = await import('./game.js');
-const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js');
+const { Mask, FACES_VERSION } = await import('./mask.js?v=20261031193659');
+const { Vision } = await import('./vision.js?v=20261031193659');
+const { react, getKey, testKey } = await import('./claude.js?v=20261031193659');
+const { createRelay } = await import('./relay.js?v=20261031193659');
+const { Game } = await import('./game.js?v=20261031193659');
+const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js?v=20261031193659');
 
 const $ = (id) => document.getElementById(id);
 const T = CONFIG.trigger;
@@ -230,8 +229,8 @@ class Robot {
       if (this.phase !== 'idle') continue;
       const r = Math.random();
       if (r < CONFIG.idle.scanChance) {
-        const ms = await this.mask.scrollText('SCANNING…', [0, 220, 255]);
-        await sleep(Math.min(ms, 4000));
+        await this.mask.showFace('scan');
+        await sleep(3500);
       } else if (r < 0.55) {
         await this.mask.showFace('blink');
         await sleep(160);
@@ -255,8 +254,9 @@ class Robot {
   async wake() {
     this.setPhase('reacting');
     await this.mask.showFace('surprised');
-    const ms = await this.mask.scrollText('OH! A HUMAN', [255, 170, 0]);
-    await sleep(Math.min(ms, 3500));
+    await sleep(1500);
+    await this.mask.showFace('excited');
+    await sleep(1200);
     await this.mask.showFace('neutral');
     this.nextAllowed = Math.max(this.nextAllowed, performance.now() + 1000);
     this.setPhase('idle');
@@ -270,10 +270,10 @@ class Robot {
     if (this.phase === 'sleep') this.setPhase('idle');
     if (this.mode === 'talk') {
       speechSynthesis?.cancel?.();
-      await this.mask.scrollText('TALK MODE', [255, 170, 0]);
+      await this.mask.showFace('wink');
       this.thought('Pausing my vision model so my human can talk. Very generous of me.', 'system');
     } else {
-      await this.mask.scrollText('ROBOT MODE', [0, 220, 255]);
+      await this.mask.showFace('scan');
       this.thought('Vision model re-engaged. Costume classifier: hungry.', 'system');
       this.scheduleNext();
       this.nextAllowed = performance.now() + 5000;
@@ -312,14 +312,14 @@ class Robot {
     const r = await react({ jpegBase64: jpeg, faceCount, routine });
     log(`claude ${r.ok ? 'ok' : 'FAILED: ' + r.error} in ${Math.round(performance.now() - t0)} ms — saw: ${r.see}`);
     if (this.mode !== 'robot') return; // Tobi switched to talk mode meanwhile
+    // The face and the voice carry the joke; the caption goes to the guest feed.
     await this.mask.showFace(r.face);
     this.say(r.say);
-    await sleep(1200);
-    const color = FACES[r.face]?.color || [255, 255, 255];
-    const ms = await this.mask.scrollText(r.caption, color);
-    await sleep(Math.min(ms, 9000));
+    this.thought(r.caption ? `[${r.caption}] ${r.thought}` : r.thought);
+    await sleep(3500);
+    await this.mask.showFace('blink');
+    await sleep(160);
     await this.mask.showFace(r.face);
-    this.thought(r.thought);
     await sleep(2500);
   }
 
@@ -328,12 +328,14 @@ class Robot {
     await this.mask.showFace('glitch');
     this.say('Segmentation fault. Core dumped. Core... dumped?');
     await sleep(1800);
-    let ms = await this.mask.scrollText('FATAL: EXCESS VIBES', [255, 40, 30]);
-    await sleep(Math.min(ms, 6000));
+    const ms = await this.mask.scrollText('ERROR', [255, 40, 30]);
+    await sleep(Math.min(ms, 4000));
     await this.mask.showFace('dead');
-    await sleep(2000);
-    ms = await this.mask.scrollText('REBOOTING v0.1…', [0, 220, 255]);
-    await sleep(Math.min(ms, 5000));
+    await sleep(2500);
+    await this.mask.showFace('sleep');
+    await sleep(1500);
+    await this.mask.showFace('scan');
+    await sleep(1500);
     await this.mask.showFace('blink');
     await sleep(300);
     await this.mask.showFace('neutral');
@@ -350,7 +352,7 @@ class Robot {
       const gesture = this.vision.loadGesture(); // load while we ask
       await this.mask.showFace('excited');
       this.say(`${faceCount} humans detected. Selfie? Give me a thumbs up!`);
-      this.mask.scrollText('SELFIE? THUMBS UP', [255, 60, 170]);
+      this.mask.scrollText('SELFIE?', [255, 60, 170]);
       await gesture;
       const until = performance.now() + CONFIG.selfieWaitMs;
       let ok = false;
@@ -373,7 +375,6 @@ class Robot {
       const blob = await this.vision.grabSelfie(`${faceCount} HUMANS + 1 ROBOT // ${new Date().toLocaleString()}`);
       await saveSelfie(blob);
       await this.mask.showFace('laugh');
-      this.mask.scrollText('SELFIE SAVED!', [40, 255, 120]);
       this.say('Selfie captured. Stored on my local disk only. Not in my training set. Probably.');
       this.thought(`Took a selfie with ${faceCount} humans. Stored on my human's phone only, not uploaded anywhere.`, 'system');
       renderSelfies();
@@ -381,8 +382,8 @@ class Robot {
     } catch (e) {
       if (e.name === 'AbortError') {
         log('selfie cancelled');
-        this.mask.scrollText('SELFIE CANCELLED', [255, 170, 0]);
-        await sleep(2500);
+        await this.mask.showFace('sad');
+        await sleep(1500);
       } else {
         log(`selfie error: ${e.message}`);
       }
@@ -396,10 +397,9 @@ class Robot {
     this.setPhase('guest');
     try {
       await this.mask.showFace('excited');
-      const ms = await this.mask.scrollText('GUEST CONTROL', [255, 60, 170]);
       this.say(`Guest control engaged. Displaying: ${item.caption.toLowerCase()}`);
-      await wait(Math.min(ms, 6000), signal);
-      await this.mask.playEmoteBitmap(emoteToColumns(item.rows), item.caption);
+      await wait(1500, signal);
+      await this.mask.playEmoteImage(emoteToGrid(item.rows), item.caption);
       await wait(CONFIG.game.emoteShowMs, signal);
       this.thought(`A guest took control of my face: "${item.caption}". I allowed it. Character growth.`, 'guest');
       return 'done';
@@ -641,8 +641,8 @@ $('lab-bitmap').onclick = async () => {
     '..rrrrooooyyyyggggbbbbpp',
     '........................',
   ];
-  const ok = await robot.mask.playEmoteBitmap(emoteToColumns(rows), 'TEST BITMAP');
-  labLog(ok ? 'test bitmap sent' : 'bitmap failed (fell back to text)');
+  await robot.mask.showColumns(emoteToColumns(rows));
+  labLog('test bitmap sent');
 };
 // Ruler on the 16-row text channel: count what's visible to find the real width
 // and where the band sits.
@@ -723,17 +723,36 @@ $('lab-faces').onclick = async () => {
   }
   await robot.mask.showFace('neutral');
 };
+function installStatus() {
+  const d = robot.mask.diy;
+  $('lab-install-status').textContent = d
+    ? `${Object.keys(d.faces).length} faces in slots 1–${d.emoteSlot - 1}${d.version !== FACES_VERSION ? ' (OUTDATED: install again)' : ''}`
+    : 'not installed yet: one-time upload, a few minutes, keep the phone close';
+}
+installStatus();
+$('lab-install').onclick = async () => {
+  if (!robot.mask.ble.connected) return labLog('mask not connected');
+  $('lab-install').disabled = true;
+  const t0 = performance.now();
+  try {
+    const d = await robot.mask.installFaces((done, total, face) => {
+      $('lab-install-status').textContent = `uploading ${done}/${total} (${face})…`;
+    });
+    labLog(`faces installed in ${Math.round((performance.now() - t0) / 1000)} s; emote slot ${d.emoteSlot}`);
+    $('lab-facemode').value = 'diy';
+  } catch (e) {
+    labLog(`install failed: ${e.message}`);
+  } finally {
+    $('lab-install').disabled = false;
+    installStatus();
+  }
+};
 $('lab-facemode').value = robot.mask.faceMode;
 $('lab-facemode').onchange = (e) => robot.mask.setFaceMode(e.target.value);
 $('lab-pad').checked = CONFIG.mask.padUploadPackets;
 $('lab-pad').onchange = (e) => {
   CONFIG.mask.padUploadPackets = e.target.checked;
   store.set('padUpload', e.target.checked);
-};
-$('lab-width').value = CONFIG.mask.width;
-$('lab-width-save').onclick = () => {
-  store.set('maskWidth', Math.max(16, Math.min(96, +$('lab-width').value || 44)));
-  location.reload();
 };
 
 robot.renderStatus();

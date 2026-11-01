@@ -1,9 +1,12 @@
 // Every tunable number lives here. Tweak at the party, not in the logic.
 export const CONFIG = {
-  // Mask geometry (confirm in the mask lab on Friday; overridable in localStorage).
+  // Mask geometry, measured on the real mask: full-face DIY images are 46 x 58
+  // (an oval, column order); text/bitmaps are a 16-row band at eye level.
   mask: {
-    width: 44,
+    width: 46, // text band width (about 38 columns are actually visible)
     height: 16, // the text/bitmap channel is always 16 rows
+    bandTop: 21, // first face row the text band covers (simulator only)
+    animFrameMs: 450, // animated faces flip between DIY slots this often
     textSpeed: 40, // SPEED byte for scrolling text
     scrollColsPerSec: 18, // used to estimate how long a scroll pass takes
     padUploadPackets: false, // official app pads to 100 bytes; mask-go doesn't
@@ -77,7 +80,8 @@ export const CONFIG = {
     emoteQueueMax: 5,
     emoteShowMs: 10000,
     emoteGapMs: 8000,
-    emoteWidth: 24,
+    emoteWidth: 23, // guest pixel art, doubled to fill the 46 x 58 face
+    emoteHeight: 29,
     maxRequestAgeMs: 2 * 60 * 1000,
     maxRequestsPerMin: 30, // global; anything beyond is dropped
   },

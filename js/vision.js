@@ -1,7 +1,7 @@
 // Camera + on-device perception. No frame leaves this module except through
 // grabJpeg() (one in-memory frame for one Claude reaction) and grabSelfie().
 
-import { CONFIG } from './config.js';
+import { CONFIG } from './config.js?v=20261031193659';
 
 const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35';
 const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';

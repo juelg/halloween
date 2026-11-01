@@ -86,18 +86,49 @@ export function emoteToColumns(rows) {
 }
 
 // Validate and normalise emote rows from the model. Returns null if unusable.
-export function normalizeEmoteRows(rows, width) {
-  if (!Array.isArray(rows) || rows.length < 8) return null;
+export function normalizeEmoteRows(rows, width, height = 16) {
+  if (!Array.isArray(rows) || rows.length < height / 2) return null;
   const out = [];
-  for (let y = 0; y < 16; y++) {
+  for (let y = 0; y < height; y++) {
     let r = typeof rows[y] === 'string' ? rows[y].toLowerCase() : '';
     r = [...r].map((ch) => (ch in EMOTE_PALETTE ? ch : '.')).join('');
     r = r.slice(0, width).padEnd(width, '.');
     out.push(r);
   }
   const lit = out.join('').replace(/\./g, '').length;
-  if (lit < 8 || lit > width * 16 * 0.85) return null;
+  if (lit < 8 || lit > width * height * 0.85) return null;
   return out;
+}
+
+// Emote rows (half resolution) -> full-face grid, each pixel doubled.
+export function emoteToGrid(rows, k = 2) {
+  return rows.flatMap((row) => {
+    const wide = [...row].flatMap((ch) => Array(k).fill(EMOTE_PALETTE[ch] || null));
+    return Array.from({ length: k }, () => wide.slice());
+  });
+}
+
+// Draw a grid as round LEDs, optionally only inside the mask's oval (guest
+// previews and the image the safety screen looks at).
+export function drawGridToCanvas(canvas, grid, { scale = 6, bg = '#05070a', oval = true } = {}) {
+  const h = grid.length, w = grid[0].length;
+  canvas.width = w * scale;
+  canvas.height = h * scale;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const dx = (x + 0.5 - w / 2) / (w / 2), dy = (y + 0.5 - h / 2) / (h / 2);
+      if (oval && dx * dx + dy * dy > 1) continue;
+      const c = grid[y][x];
+      ctx.fillStyle = c ? `rgb(${c.join(',')})` : '#14181f';
+      ctx.beginPath();
+      ctx.arc(x * scale + scale / 2, y * scale + scale / 2, scale * 0.42, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+  return canvas;
 }
 
 // Draw columns to a canvas as round LEDs (used for guest previews and for the
