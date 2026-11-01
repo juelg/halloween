@@ -1,7 +1,7 @@
 // Camera + on-device perception. No frame leaves this module except through
 // grabJpeg() (one in-memory frame for one Claude reaction) and grabSelfie().
 
-import { CONFIG } from './config.js?v=20261031200737';
+import { CONFIG } from './config.js?v=20261031201418';
 
 const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35';
 const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
@@ -235,7 +235,7 @@ export class Vision extends EventTarget {
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
     ctx.fillRect(0, c.height - fs * 2.6, c.width, fs * 2.6);
     ctx.fillStyle = '#00dcff';
-    ctx.fillText('AI2 EMBODIED AGENT v0.1 // SELFIE.EXE', pad, c.height - fs * 1.4);
+    ctx.fillText('EMBODIED AGENT v0.1 // SELFIE.EXE', pad, c.height - fs * 1.4);
     ctx.fillStyle = '#ffffff';
     ctx.font = `${Math.round(fs * 0.7)}px "Courier New", monospace`;
     ctx.fillText(caption, pad, c.height - fs * 0.45);

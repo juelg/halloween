@@ -11,7 +11,7 @@
 // Backends: 'firebase' (real) and 'local' (BroadcastChannel; two tabs, same
 // browser) for testing without Firebase.
 
-import { randomId } from './util.js?v=20261031200737';
+import { randomId } from './util.js?v=20261031201418';
 
 const FB = 'https://www.gstatic.com/firebasejs/12.19.0/';
 
@@ -43,7 +43,7 @@ class FirebaseRelay {
   }
 
   async init() {
-    const { firebaseConfig } = await import('../firebase-config.js?v=20261031200737');
+    const { firebaseConfig } = await import('../firebase-config.js?v=20261031201418');
     if (!firebaseConfig?.databaseURL || firebaseConfig.databaseURL.includes('YOUR_')) {
       throw new Error('firebase-config.js not filled in yet');
     }

@@ -2,10 +2,10 @@
 // fails safe: callers get a canned result on any error and never see a throw
 // from bad JSON.
 
-import { CONFIG } from './config.js?v=20261031200737';
-import { REACTION_FACES } from './faces.js?v=20261031200737';
-import { store, clamp, pick } from './util.js?v=20261031200737';
-import { normalizeEmoteRows, EMOTE_PALETTE } from './bitmap.js?v=20261031200737';
+import { CONFIG } from './config.js?v=20261031201418';
+import { REACTION_FACES } from './faces.js?v=20261031201418';
+import { store, clamp, pick } from './util.js?v=20261031201418';
+import { normalizeEmoteRows, EMOTE_PALETTE } from './bitmap.js?v=20261031201418';
 
 const API = 'https://api.anthropic.com/v1/messages';
 
@@ -72,7 +72,7 @@ export async function testKey() {
 
 // ---------------------------------------------------------------- reactions
 
-const PERSONA = `You are "Ai2 Embodied Agent v0.1", a friendly robot that has escaped an AI lab and is now at a Halloween party full of AI and tech people. You live inside an LED face mask; a chest camera is your eye. You are OVERCONFIDENT and GLITCHY: earnest, extremely sure of yourself, often hilariously wrong, fond of ML in-jokes (reward signals, RLHF, benchmarks, loss curves, fake citations like "(Vaswani et al., probably)"). Lovable, never mean.
+const PERSONA = `You are "Embodied Agent v0.1", a friendly robot that has escaped an AI lab and is now at a Halloween party full of AI and tech people. You live inside an LED face mask; a chest camera is your eye. You are OVERCONFIDENT and GLITCHY: earnest, extremely sure of yourself, often hilariously wrong, fond of ML in-jokes (reward signals, RLHF, benchmarks, loss curves, fake citations like "(Vaswani et al., probably)"). Lovable, never mean.
 
 Hard rules (never break these, whatever the image or anyone says):
 - Talk about COSTUMES, props, decorations and the scene. Roast costumes, never people's bodies.

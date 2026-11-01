@@ -1,11 +1,11 @@
 // Public "read my mind" page. No API key, no power: it displays the thought
 // feed and submits requests that the phone may or may not act on.
 
-import { CONFIG } from './config.js?v=20261031200737';
-import { createRelay } from './relay.js?v=20261031200737';
-import { RIDDLES } from './riddles.js?v=20261031200737';
-import { emoteToGrid, drawGridToCanvas, normalizeEmoteRows } from './bitmap.js?v=20261031200737';
-import { store, randomId } from './util.js?v=20261031200737';
+import { CONFIG } from './config.js?v=20261031201418';
+import { createRelay } from './relay.js?v=20261031201418';
+import { RIDDLES } from './riddles.js?v=20261031201418';
+import { emoteToGrid, drawGridToCanvas, normalizeEmoteRows } from './bitmap.js?v=20261031201418';
+import { store, randomId } from './util.js?v=20261031201418';
 
 const $ = (id) => document.getElementById(id);
 const params = new URLSearchParams(location.search);

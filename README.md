@@ -1,4 +1,4 @@
-# Ai2 Embodied Agent v0.1
+# Embodied Agent v0.1
 
 A Halloween costume: a robot that escaped an AI lab. An LED face mask shows its expressions, and an Android phone on a chest harness is its eye and brain. Guests scan a QR code to read its thoughts and, if they solve a riddle (or convince it), to borrow its face.
 
