@@ -1,20 +1,20 @@
 // The robot's brain: runs on Tobi's phone. The only place that makes decisions
 // or calls Claude.
 
-import { CONFIG } from './config.js?v=20261031202541';
-import { store, sleep, pick, randomId, weightedPick } from './util.js?v=20261031202541';
-import { FACES } from './faces.js?v=20261031202541';
-import { emoteToColumns, emoteToGrid } from './bitmap.js?v=20261031202541';
+import { CONFIG } from './config.js?v=20261031203544';
+import { store, sleep, pick, randomId, weightedPick } from './util.js?v=20261031203544';
+import { FACES } from './faces.js?v=20261031203544';
+import { emoteToColumns, emoteToGrid } from './bitmap.js?v=20261031203544';
 
 // Lab overrides must land before the mask/sim read CONFIG.
 CONFIG.mask.padUploadPackets = store.get('padUpload', CONFIG.mask.padUploadPackets);
 
-const { Mask, FACES_VERSION } = await import('./mask.js?v=20261031202541');
-const { Vision } = await import('./vision.js?v=20261031202541');
-const { react, getKey, testKey } = await import('./claude.js?v=20261031202541');
-const { createRelay } = await import('./relay.js?v=20261031202541');
-const { Game } = await import('./game.js?v=20261031202541');
-const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js?v=20261031202541');
+const { Mask, FACES_VERSION } = await import('./mask.js?v=20261031203544');
+const { Vision } = await import('./vision.js?v=20261031203544');
+const { react, getKey, testKey } = await import('./claude.js?v=20261031203544');
+const { createRelay } = await import('./relay.js?v=20261031203544');
+const { Game } = await import('./game.js?v=20261031203544');
+const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js?v=20261031203544');
 
 const $ = (id) => document.getElementById(id);
 const T = CONFIG.trigger;
@@ -533,6 +533,24 @@ async function renderSelfies() {
 $('btn-start').onclick = () => robot.startStop();
 $('btn-talk').onclick = () => robot.toggleTalk();
 $('btn-react').onclick = () => robot.started && robot.reaction(robot.faceCount ?? 1, null);
+// SHOW QR: guests scan the guest page straight off the phone screen.
+$('btn-qr').onclick = () => {
+  const c = $('qr-canvas');
+  if (!c.width || c.width === 300) {
+    const qr = window.qrcode(0, 'M');
+    qr.addData('https://tobiasjuelg.de/halloween/');
+    qr.make();
+    const n = qr.getModuleCount(), quiet = 4, k = 12;
+    c.width = c.height = (n + 2 * quiet) * k;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.fillStyle = '#000';
+    for (let r = 0; r < n; r++) for (let q = 0; q < n; q++) if (qr.isDark(r, q)) ctx.fillRect((q + quiet) * k, (r + quiet) * k, k, k);
+  }
+  $('qr-pop').classList.remove('hidden');
+};
+$('qr-pop').onclick = () => $('qr-pop').classList.add('hidden');
 $('btn-clear').onclick = () => confirm('Clear the thought feed for all guests?') && robot.clearMind();
 $('btn-crash').onclick = () => robot.started && robot.reaction(0, 'crash');
 $('btn-lab').onclick = () => $('lab').classList.toggle('hidden');

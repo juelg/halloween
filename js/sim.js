@@ -2,9 +2,9 @@
 // same interface as the real mask so the brain can't tell the difference.
 // Text and 16-row bitmaps appear in the eye band, like on the real mask.
 
-import { CONFIG } from './config.js?v=20261031202541';
-import { renderFullFace, columnsToGrid, inOval, FULL_W, FULL_H } from './faces.js?v=20261031202541';
-import { textToColumns } from './bitmap.js?v=20261031202541';
+import { CONFIG } from './config.js?v=20261031203544';
+import { renderFullFace, columnsToGrid, inOval, FULL_W, FULL_H } from './faces.js?v=20261031203544';
+import { textToColumns } from './bitmap.js?v=20261031203544';
 
 export class MaskSim {
   constructor(canvas) {

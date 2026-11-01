@@ -64,3 +64,10 @@ input[type=checkbox] { width: 26px; height: 26px; min-height: 0; }
 .selfies img { width: 100%; border-radius: 8px; display: block; }
 .selfies figcaption { display: flex; gap: 6px; margin-top: 6px; }
 .selfies figcaption button { flex: 1; padding: 6px; font-size: 12px; }
+
+/* SHOW QR: full-screen, white, so a guest can scan it off the phone */
+.qr-pop { position: fixed; inset: 0; z-index: 50; background: #fff; color: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px; text-align: center; }
+.qr-pop canvas { width: min(88vw, 70vh); height: auto; image-rendering: pixelated; }
+.qr-pop .qr-big { font-size: 26px; font-weight: 800; margin: 16px 0 4px; letter-spacing: 0.04em; }
+.qr-pop .qr-url { font-size: 16px; margin: 0; }
+.qr-pop .qr-hint { font-size: 12px; color: #666; margin-top: 18px; }
