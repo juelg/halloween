@@ -629,6 +629,9 @@ $('lab-ruler').onclick = async () => {
     return { bits, rgb: tick && i % 10 ? [255, 255, 255] : hues[Math.floor(i / 10)] };
   });
   try {
+    // Leftover gradient / fixed-colour text effects override per-column colours.
+    await b.setTextEffect(false, 0);
+    await b.setTextColor(false, [255, 255, 255]);
     await b.showColumns(cols, 1);
     labLog('ruler sent: 0-9 red, 10-19 orange, 20-29 yellow, 30-39 green, 40-49 cyan, 50-59 blue, 60-63 purple');
   } catch (e) {
@@ -662,6 +665,17 @@ $('lab-image').onclick = async () => {
     labLog(`image uploaded, PLAY 1 ${slot} sent`);
   } catch (e) {
     labLog(`image upload failed: ${e.message}`);
+  }
+};
+// Probe: BC (background colour) black, to hide the built-in image behind text.
+$('lab-bgblack').onclick = async () => {
+  const b = robot.mask.ble;
+  if (!b.connected) return labLog('mask not connected');
+  try {
+    await b.command('BC', [1, 0, 0, 0]);
+    labLog('BC 1 0 0 0 sent (background black)');
+  } catch (e) {
+    labLog(`BC failed: ${e.message}`);
   }
 };
 $('lab-copy').onclick = async () => {
