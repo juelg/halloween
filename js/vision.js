@@ -1,7 +1,7 @@
 // Camera + on-device perception. No frame leaves this module except through
 // grabJpeg() (one in-memory frame for one Claude reaction) and grabSelfie().
 
-import { CONFIG } from './config.js?v=20261031193659';
+import { CONFIG } from './config.js?v=20261031195155';
 
 const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.35';
 const FACE_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
@@ -57,6 +57,7 @@ export class Vision extends EventTarget {
     // A failed model download (party wifi…) must not stop the robot: keep the
     // camera, cover detection and manual reactions, and keep retrying.
     const load = async (attempt = 1) => {
+      if (this.detector) return progress('face detector ready');
       try {
         await this.loadDetector();
         progress('face detector loaded');
@@ -72,7 +73,7 @@ export class Vision extends EventTarget {
     const track = this.stream.getAudioTracks()[0];
     if (!track) return;
     try {
-      const ctx = new AudioContext();
+      const ctx = (this.audioCtx = new AudioContext());
       const src = ctx.createMediaStreamSource(new MediaStream([track]));
       this.analyser = ctx.createAnalyser();
       this.analyser.fftSize = 512;
@@ -135,6 +136,18 @@ export class Vision extends EventTarget {
   stop() {
     clearInterval(this.timer);
     clearInterval(this.coverTimer);
+  }
+
+  // Stop detection and turn the camera and mic off (STOP ROBOT).
+  release() {
+    this.stop();
+    this.stream?.getTracks().forEach((t) => t.stop());
+    this.stream = null;
+    this.video.srcObject = null;
+    this.audioCtx?.close?.().catch(() => {});
+    this.audioCtx = null;
+    this.analyser = null;
+    this.faces = [];
   }
 
   detect() {

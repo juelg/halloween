@@ -12,7 +12,8 @@
     .tag { border: 3px solid #000; border-radius: 16px; padding: 18px; text-align: center; break-inside: avoid; }
     .tag canvas { width: 100%; max-width: 320px; height: auto; image-rendering: pixelated; }
     .big { font-size: 26px; font-weight: 800; letter-spacing: 0.06em; margin: 8px 0 2px; }
-    .small { font-size: 13px; margin: 0; }
+    .mid { font-size: 15px; font-weight: 700; margin: 4px 0 6px; }
+    .small { font-size: 12px; margin: 0; }
     .url { font-size: 11px; margin-top: 6px; color: #333; word-break: break-all; }
     .toolbar { padding: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
     button { font: inherit; padding: 10px 16px; border: 2px solid #000; background: #fff; border-radius: 8px; cursor: pointer; }
@@ -20,9 +21,16 @@
     body.bare .sheet { display: block; padding: 0; }
     body.bare .tag { border: 0; padding: 20px; border-radius: 0; }
     body.bare .tag canvas { max-width: none; width: 560px; }
-    @media print { .toolbar { display: none; } .sheet { padding: 0; } }
+    @page { size: letter; margin: 0.4in; }
+    @media print {
+      .toolbar { display: none; }
+      .sheet { padding: 0; grid-template-columns: 1fr 1fr; gap: 0.3in; }
+      .tag { padding: 12px; }
+      .tag canvas { max-width: 2.6in; }
+      .big { font-size: 22px; letter-spacing: 0.02em; }
+    }
   </style>
-  <script src="vendor/qrcode.js?v=20261031193659"></script>
+  <script src="vendor/qrcode.js?v=20261031195155"></script>
 </head>
 <body>
   <div class="toolbar">
@@ -59,7 +67,8 @@
       tag.appendChild(qrCanvas(URL_, 16));
       tag.insertAdjacentHTML('beforeend',
         '<div class="text"><p class="big">SCAN TO READ MY MIND</p>' +
-        '<p class="small">AI2 EMBODIED AGENT v0.1 · costumes only · no photos uploaded</p>' +
+        '<p class="mid">read my thoughts live · solve a riddle to take over my face</p>' +
+        '<p class="small">AI2 EMBODIED AGENT v0.1 · I roast costumes, never people · no photos uploaded</p>' +
         `<p class="url">${URL_.replace('https://', '')}</p></div>`);
       document.getElementById('sheet').appendChild(tag);
     }

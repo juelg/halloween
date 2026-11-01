@@ -1,20 +1,20 @@
 // The robot's brain: runs on Tobi's phone. The only place that makes decisions
 // or calls Claude.
 
-import { CONFIG } from './config.js?v=20261031193659';
-import { store, sleep, pick, randomId, weightedPick } from './util.js?v=20261031193659';
-import { FACES } from './faces.js?v=20261031193659';
-import { emoteToColumns, emoteToGrid } from './bitmap.js?v=20261031193659';
+import { CONFIG } from './config.js?v=20261031195155';
+import { store, sleep, pick, randomId, weightedPick } from './util.js?v=20261031195155';
+import { FACES } from './faces.js?v=20261031195155';
+import { emoteToColumns, emoteToGrid } from './bitmap.js?v=20261031195155';
 
 // Lab overrides must land before the mask/sim read CONFIG.
 CONFIG.mask.padUploadPackets = store.get('padUpload', CONFIG.mask.padUploadPackets);
 
-const { Mask, FACES_VERSION } = await import('./mask.js?v=20261031193659');
-const { Vision } = await import('./vision.js?v=20261031193659');
-const { react, getKey, testKey } = await import('./claude.js?v=20261031193659');
-const { createRelay } = await import('./relay.js?v=20261031193659');
-const { Game } = await import('./game.js?v=20261031193659');
-const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js?v=20261031193659');
+const { Mask, FACES_VERSION } = await import('./mask.js?v=20261031195155');
+const { Vision } = await import('./vision.js?v=20261031195155');
+const { react, getKey, testKey } = await import('./claude.js?v=20261031195155');
+const { createRelay } = await import('./relay.js?v=20261031195155');
+const { Game } = await import('./game.js?v=20261031195155');
+const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js?v=20261031195155');
 
 const $ = (id) => document.getElementById(id);
 const T = CONFIG.trigger;
@@ -67,8 +67,16 @@ class Robot {
 
   // ------------------------------------------------------------ lifecycle
 
+  // The big button toggles: START ROBOT boots, STOP ROBOT pauses everything.
+  async startStop() {
+    if (this.booting) return;
+    if (this.started) return this.stop();
+    return this.start();
+  }
+
   async start() {
     if (this.started) return;
+    this.booting = true;
     $('btn-start').disabled = true;
     $('btn-start').textContent = 'BOOTING…';
     this.unlockSpeech();
@@ -79,23 +87,52 @@ class Robot {
       log(`camera/vision failed: ${e.message}`);
       $('btn-start').disabled = false;
       $('btn-start').textContent = 'START ROBOT';
+      this.booting = false;
       return;
     }
     this.started = true;
+    this.booting = false;
     this.vision.run(this.saver ? T.detectFpsSaver : T.detectFps);
     this.mask.sim.setFps(this.saver ? 8 : 20);
-    $('btn-start').textContent = 'RUNNING';
-    await this.connectRelay();
-    this.idleLoop();
-    setInterval(() => this.renderHud(), 500);
-    setInterval(() => this.heartbeat(), CONFIG.relay.heartbeatMs);
-    await this.mask.scrollText('BOOTING v0.1… CONFIDENCE 100%', [0, 220, 255]);
+    $('btn-start').disabled = false;
+    $('btn-start').textContent = 'STOP ROBOT';
+    $('btn-start').classList.add('danger');
+    if (!this.relay) await this.connectRelay(); // keep one relay across stop/start
+    if (!this.idleRunning) this.idleLoop();
+    this.timers = [
+      setInterval(() => this.renderHud(), 500),
+      setInterval(() => this.heartbeat(), CONFIG.relay.heartbeatMs),
+    ];
+    this.setPhase('idle');
+    this.heartbeat();
+    await this.mask.showFace('scan');
+    await sleep(1500);
     this.mask.showFace('neutral');
     this.say('Embodied agent online. Confidence: one hundred percent. Accuracy: pending.');
     this.thought('Booted up at a party. Calibrating my costume classifier. Confidence: unreasonably high.', 'system');
     this.lastNear = performance.now();
     this.renderStatus();
     if (!getKey()) log('no API key saved: reactions will use canned lines');
+  }
+
+  stop() {
+    if (!this.started) return;
+    this.started = false;
+    this.timers?.forEach(clearInterval);
+    this.timers = [];
+    this.vision.release();
+    this.selfieCtrl?.abort();
+    speechSynthesis?.cancel?.();
+    this.lock?.release?.().catch(() => {});
+    this.lock = null;
+    this.setPhase('off');
+    this.mask.showFace('sleep');
+    this.relay?.setStatus({ online: false, mode: this.mode }).catch(() => {});
+    $('btn-start').textContent = 'START ROBOT';
+    $('btn-start').classList.remove('danger');
+    this.renderStatus();
+    this.thought('Shutting down. Saving nothing. Remembering nothing. Goodnight.', 'system');
+    log('robot stopped (camera off)');
   }
 
   async connectRelay() {
@@ -126,8 +163,10 @@ class Robot {
       }
     };
     await grab();
+    if (this.lockListener) return;
+    this.lockListener = true;
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') grab();
+      if (document.visibilityState === 'visible' && this.started) grab();
     });
   }
 
@@ -223,6 +262,7 @@ class Robot {
   }
 
   async idleLoop() {
+    this.idleRunning = true;
     for (;;) {
       const gap = CONFIG.idle.minGapMs + Math.random() * (CONFIG.idle.maxGapMs - CONFIG.idle.minGapMs);
       await sleep(this.saver ? gap * 2 : gap);
@@ -298,7 +338,7 @@ class Robot {
       log(`reaction error: ${e.message}`);
     } finally {
       this.scheduleNext();
-      if (this.phase !== 'idle') {
+      if (this.started && this.phase !== 'idle') {
         await this.mask.showFace(this.mode === 'talk' ? 'happy' : 'neutral');
         this.setPhase('idle');
       }
@@ -409,8 +449,10 @@ class Robot {
       await sleep(2500);
       return 'vetoed';
     } finally {
-      await this.mask.showFace('neutral');
-      this.setPhase('idle');
+      if (this.started) {
+        await this.mask.showFace('neutral');
+        this.setPhase('idle');
+      }
     }
   }
 
@@ -468,7 +510,7 @@ async function renderSelfies() {
   }
 }
 
-$('btn-start').onclick = () => robot.start();
+$('btn-start').onclick = () => robot.startStop();
 $('btn-talk').onclick = () => robot.toggleTalk();
 $('btn-react').onclick = () => robot.started && robot.reaction(robot.faceCount ?? 1, null);
 $('btn-crash').onclick = () => robot.started && robot.reaction(0, 'crash');
