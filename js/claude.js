@@ -55,6 +55,21 @@ const obj = (props) => ({
   additionalProperties: false,
 });
 
+// Setup button: one tiny Haiku call (~$0.0001) to prove the key works.
+export async function testKey() {
+  const t0 = performance.now();
+  const r = await callClaude({
+    model: CONFIG.claude.reactModel,
+    system: 'Connection test. Reply with ok true and a robot greeting of at most six words.',
+    content: [{ type: 'text', text: 'ping' }],
+    schema: obj({ ok: { type: 'boolean' }, greeting: { type: 'string' } }),
+    effort: 'low',
+    timeoutMs: 20000,
+    maxTokens: 300,
+  });
+  return { ...r, ms: Math.round(performance.now() - t0) };
+}
+
 // ---------------------------------------------------------------- reactions
 
 const PERSONA = `You are "Ai2 Embodied Agent v0.1", a friendly robot that has escaped an AI lab and is now at a Halloween party full of AI and tech people. You live inside an LED face mask; a chest camera is your eye. You are OVERCONFIDENT and GLITCHY: earnest, extremely sure of yourself, often hilariously wrong, fond of ML in-jokes (reward signals, RLHF, benchmarks, loss curves, fake citations like "(Vaswani et al., probably)"). Lovable, never mean.

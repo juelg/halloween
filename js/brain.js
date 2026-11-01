@@ -12,7 +12,7 @@ CONFIG.mask.padUploadPackets = store.get('padUpload', CONFIG.mask.padUploadPacke
 
 const { Mask } = await import('./mask.js');
 const { Vision } = await import('./vision.js');
-const { react, getKey } = await import('./claude.js');
+const { react, getKey, testKey } = await import('./claude.js');
 const { createRelay } = await import('./relay.js');
 const { Game } = await import('./game.js');
 const { saveSelfie, listSelfies, deleteSelfie, downloadBlob } = await import('./selfies.js');
@@ -504,6 +504,33 @@ $('set-key-forget').onclick = () => {
   store.del('apiKey');
   $('set-key').value = '';
   log('API key forgotten');
+};
+$('set-key-test').onclick = async () => {
+  if (!getKey()) return log('TEST CLAUDE: no key saved yet (paste it and tap SAVE KEY)');
+  log('TEST CLAUDE: calling…');
+  try {
+    const r = await testKey();
+    log(`TEST CLAUDE: OK in ${r.ms} ms, model ${CONFIG.claude.reactModel} says "${r.greeting}"`);
+  } catch (e) {
+    log(`TEST CLAUDE: FAILED (${e.message})`);
+  }
+};
+// Uses whatever token is in the box (saved or not), so it can be checked before saving.
+$('set-relay-test').onclick = async () => {
+  const token = $('set-token').value.trim();
+  if (!token) return log('TEST FIREBASE: no token in the box');
+  log('TEST FIREBASE: connecting…');
+  try {
+    const relay = await createRelay({ mode: 'firebase', token });
+    await Promise.race([
+      relay.setStatus({ online: true, mode: robot.mode }),
+      sleep(10000).then(() => Promise.reject(new Error('no answer in 10 s (offline?)'))),
+    ]);
+    log('TEST FIREBASE: OK, database reachable and token accepted');
+  } catch (e) {
+    const denied = /permission/i.test(e.message);
+    log(`TEST FIREBASE: FAILED (${denied ? 'token rejected: it must match admin/token exactly' : e.message})`);
+  }
 };
 $('set-relay').value = store.get('relayMode', 'off');
 $('set-relay').onchange = (e) => {
